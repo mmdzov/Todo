@@ -1,78 +1,63 @@
-import React, { Component } from "react";
-import Persons from "./components/Person/Persons";
+import React, { useReducer } from "react";
+import Works from "./components/Works/Works";
 
-class App extends Component {
-  state = {
-    persons: [],
-    person: "",
-    showPersons: false,
+const App = () => {
+  const initialState = {
+    work: "",
+    works: [],
   };
-  handleShowPersons = () => {
-    this.setState({ showPersons: !this.state.showPersons });
+  const workReducer = (state = initialState, action) => {
+    switch (action.type) {
+      case "SETWORK": {
+        return { ...state, work: action.work };
+      }
+      case "PUSHWORK": {
+        const works = [...state.works];
+        const work = {
+          id: Math.floor(Math.random() * 999999),
+          workName: state.work,
+        };
+        works.push(work);
+        return { ...state, works, work: "" };
+      }
+      case "DELETEWORK": {
+        const { works: allWork } = state;
+        const works = allWork.filter((w) => w.id !== action.id);
+        return { ...state, works };
+      }
+      case "EDITWORK": {
+        const works = [...state.works];
+        const index = works.findIndex((w) => w.id === action.id);
+        const work = works[index];
+        work.workName = action.name;
+        return { ...state, works };
+      }
+      default:
+        return state;
+    }
   };
-  handleDeletePerson = (id) => {
-    const persons = [...this.state.persons];
-    const newPersons = persons.filter((p) => p.id !== id);
-    this.setState({ persons: newPersons });
+  const [state, dispatch] = useReducer(workReducer, initialState);
+  const setWork = (e) => dispatch({ type: "SETWORK", work: e.target.value });
+  const handleSetWork = () => dispatch({ type: "PUSHWORK" });
+  const handleDeleteWork = (id) => dispatch({ type: "DELETEWORK", id });
+  const handleChangeNewWork = (event, id,callback) => {
+    dispatch({ type: "EDITWORK", id, name: event.target.value });
+    return callback(event.target.value)
   };
-  handleChangePerson = (event, id) => {
-    const { persons: allPersons } = this.state;
-    const persons = [...allPersons];
-    const index = persons.findIndex((p) => p.id === id);
-    const person = persons[index];
-    person.fullName = event.target.value;
-    this.setState({ persons: persons });
-  };
-  handleMakePerson = () => {
-    const persons = [...this.state.persons];
-    const person = {
-      id: Math.floor(Math.random() * 999999),
-      fullName: this.state.person,  
-    };
-    persons.push(person);
-    this.setState({ persons,person: '' });
-  };
-  setPerson = (event) => {
-    this.setState({ person: event.target.value });
-  };
-  render() {
-    const { persons, showPersons } = this.state;
-    const styles = {
-      textAlign: "center",
-    };
-    const buttonStyle = {
-      padding: "1em",
-      fontFamily: "BYekan",
-      backgroundColor: "pink",
-    };
-    return (
-      <div style={styles}>
-        <h1>Person manager</h1>
-        <h4>count person: {persons.length}</h4>
 
-        <div className=''>
-          <input
-            type='text'
-            placeholder='Make New Person'
-            value={this.state.person}
-            onChange={this.setPerson}
-          />
-          <button onClick={this.handleMakePerson}>make Person</button>
-        </div>
-
-        <button onClick={this.handleShowPersons} style={buttonStyle}>
-          show persons
-        </button>
-        {showPersons ? (
-          <Persons
-            persons={persons}
-            deletePerson={this.handleDeletePerson}
-            changePerson={this.handleChangePerson}
-          />
-        ) : null}
-      </div>
-    );
-  }
-}
+  const { work, works } = state;
+  return (
+    <React.Fragment>
+      <Works
+        changeNewWork={handleChangeNewWork}
+        handleSetWork={handleSetWork}
+        deleteWork={handleDeleteWork}
+        workItems={works}
+        setWork={setWork}
+        work={work}
+      />
+    </React.Fragment>
+  );
+};
 
 export default App;
