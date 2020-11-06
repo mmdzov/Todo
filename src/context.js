@@ -7,4 +7,4 @@ const workContext = createContext({
   deleteWork: () => {},
   handleSetWork: () => {},
 });
-export default workContext;
+export { workContext };

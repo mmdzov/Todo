@@ -1,6 +1,6 @@
 import React, { useReducer } from "react";
 import Works from "./components/Works/Works";
-import workContext from "./context";
+import {workContext} from "./context";
 import WorkReducer from "./store/Reducers/WorkReducer";
 import initialState from "./store/states/state";
 

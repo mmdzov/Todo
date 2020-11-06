@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import workContext from "../../context";
+import {workContext} from "../../context";
 import Button from "../Buttons/Button";
 import Input from "../inputs/Input";
 
