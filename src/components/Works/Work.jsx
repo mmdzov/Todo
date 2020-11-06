@@ -1,48 +1,52 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useContext, useReducer } from "react";
 import "./Work.css";
 import Button from "../Buttons/Button";
 import EditWork from "./EditWork";
-const Work = (props) => {
-  const [state, setState] = useState({
-    toggle: true,
-    status: "active",
-    isValid: false,
-  });
+import workContext from "../../context";
+import HandlerWorkReducer from "../../store/Reducers/HandlerWorkReducer";
+import initialState from "../../store/states/state";
+const Work = ({ workName, id }) => {
+  const wrk = useContext(workContext);
+  const [state, dispatch] = useReducer(HandlerWorkReducer, initialState);
   const handleComplete = useCallback(() => {
-    setState((prev) => ({ ...prev, status: "completed" }));
-  }, [setState]);
-  const editWork = useCallback(
-    () => setState((prev) => ({ ...prev, toggle: false, status: "editing" })),
-    [setState]
-  );
+    dispatch({ type: "COMPLETE" });
+  }, [dispatch]);
+  const editWork = useCallback(() => dispatch({ type: "EDITWORK" }), [
+    dispatch,
+  ]);
   const submitEditWork = useCallback(() => {
-    setState((prev) => ({ ...prev, toggle: true, status: "edited" }));
-  }, [setState]);
-  const handleChangeCallback = (value) => {
-    console.log(value);
-  };
-
+    dispatch({ type: "SUBMITEDITWORK" });
+  }, [dispatch]);
+  const handleChangeCallback = useCallback(
+    (value) => {
+      dispatch({ type: "CHANGECALLBACK", value });
+    },
+    [dispatch]
+  );
   const { status } = state;
+  const EDIT = (
+    <EditWork
+      change={(e) => wrk.changeNewWork(e, id, handleChangeCallback)}
+      workName={workName}
+      submit={submitEditWork}
+    />
+  );
   return (
     <div style={{ display: "flex" }}>
       <div className='' style={{ marginRight: 5 }}>
-        status: {state.status}
+        status: {status}
       </div>
-      <Button style={{ marginRight: 10 }} click={editWork} children='Edit' />
+      <Button click={editWork} children='Edit' />
       {state.toggle ? (
         <div
           className={status === "completed" ? "completed" : "active"}
           onClick={handleComplete}>
-          {props.workName}
+          {workName}
         </div>
       ) : (
-        <EditWork
-          change={(e) => props.changeNewWork(e, props.id, handleChangeCallback)}
-          workName={props.workName}
-          submit={submitEditWork}
-        />
+        EDIT
       )}
-      <Button click={() => props.deleteWork(props.id)} children='DELETE' />
+      <Button click={() => wrk.deleteWork(id)} children='DELETE' />
     </div>
   );
 };
